@@ -2,13 +2,13 @@ package query;
 
 import filters.Filter;
 import ui.MapMarkerPretty;
-import ui.MapMarkerSimple;
 import util.Util;
 import org.openstreetmap.gui.jmapviewer.JMapViewer;
 import org.openstreetmap.gui.jmapviewer.Layer;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -29,6 +29,7 @@ public class Query implements Observer {
     private final Filter filter;
     // The checkBox in the UI corresponding to this query (so we can turn it on and off and delete it)
     private JCheckBox checkBox;
+    private ArrayList<MapMarkerPretty> markers;
 
     public Color getColor() {
         return color;
@@ -59,6 +60,7 @@ public class Query implements Observer {
         this.color = color;
         this.layer = new Layer(queryString);
         this.map = map;
+        this.markers = new ArrayList<>();
     }
 
     @Override
@@ -68,18 +70,18 @@ public class Query implements Observer {
 
     /**
      * This query is no longer interesting, so terminate it and remove all traces of its existence.
-     *
-     * TODO: Implement this method
      */
     public void terminate() {
-
+        setVisible(false);
+        markers.clear();
     }
 
     @Override
     public void update(Observable observable, Object o) {
         if (filter.matches((Status) o))
         {
-            map.addMapMarker(new MapMarkerPretty(layer, Util.statusCoordinate((Status) o), color, ((Status) o).getUser().getMiniProfileImageURL()));
+            markers.add(new MapMarkerPretty(layer, color, (Status) o));
+            map.addMapMarker(markers.get(markers.size() - 1));
         }
     }
 }
